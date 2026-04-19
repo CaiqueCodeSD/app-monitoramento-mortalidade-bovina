@@ -1,11 +1,16 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.ui
 
-import android.view.*
-import android.widget.TextView
+import android.annotation.SuppressLint
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.recyclerview.widget.DiffUtil
+import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myfirstapp.ui.DiffCallback
+import com.example.myfirstapp.R
+import com.example.myfirstapp.model.Registro
 
 class RegistroAdapter :
     ListAdapter<Registro, RegistroAdapter.RegistroViewHolder>(DiffCallback()) {
@@ -26,12 +31,13 @@ class RegistroAdapter :
     }
 
     // 3 - Bind
+    @SuppressLint("SetTextI18n") //adicionei em 16/04 sob sugestão da IDE
     override fun onBindViewHolder(holder: RegistroViewHolder, position: Int) {
         val registro = getItem(position)
 
         holder.tvData.text = "Data: ${registro.data}"
-        holder.tvCausa.text = "Causa: ${registro.causa}"
-        holder.tvObservacao.text = "Observação: ${registro.observacao}"
+        holder.tvCausa.text = "Suspeita da causa: ${registro.causa}"
+        holder.tvObservacao.text = "Observação adicional: ${registro.observacao}"
 
     }
 }
