@@ -1,14 +1,30 @@
 <resources>
 
-    <string name="app_name">MyFirstApp</string>
+    <string name="app_name">BoviTrack</string>
 
-    <!-- Empty State -->
-    <string name="empty_state">Nenhum registro de mortalidadde encontrado</string>
+    <!-- Empty -->
+    <string name="empty_title">Nenhum registro encontrado</string>
+    <string name="empty_image_desc">Sem registros</string>
+    <string name="empty_description">
+        Ainda não há registros de mortalidade cadastrados ou disponíveis no momento.
+    </string>
 
-    <!-- Erros -->
-    <string name="erro_servidor">Erro no servidor</string>
-    <string name="erro_internet">Sem conexão com a internet</string>
-    <string name="erro_timeout">Tempo de conexão esgotado</string>
-    <string name="erro_generico">Erro inesperado</string>
+    <!-- Erro internet -->
+    <string name="error_no_connection_title">Sem conexão</string>
+    <string name="error_no_connection_desc">
+        Verifique sua internet e tente novamente.
+    </string>
+
+    <!-- Erro server -->
+    <string name="error_server_title">Erro no servidor</string>
+    <string name="error_server_desc">
+        Não foi possível carregar os dados no momento.
+    </string>
+
+    <!-- Erro genérico -->
+    <string name="error_generic_title">Erro inesperado</string>
+    <string name="error_generic_desc">
+        Ocorreu um problema. Tente novamente mais tarde.
+    </string>
 
 </resources>

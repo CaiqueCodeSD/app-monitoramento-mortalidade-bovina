@@ -6,6 +6,6 @@ import retrofit2.http.GET
 
 interface ApiService {
 
-    @GET("registros")
+    @GET("/registros")
     suspend fun getRegistros(): Response<List<Registro>>
 }
