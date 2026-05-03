@@ -6,10 +6,9 @@ import retrofit2.HttpException
 
 class RegistroRepository(
     private val apiService: ApiService
-) {
+) : RegistroRepositoryInterface {
 
-    suspend fun buscarRegistros(): List<Registro> {
-
+    override suspend fun buscarRegistros(): List<Registro> {
         val response = apiService.getRegistros()
 
         if (response.isSuccessful) {

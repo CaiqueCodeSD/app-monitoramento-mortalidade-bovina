@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
                                 state.message.contains("servidor", true) -> {
                                     titleState.text = getString(R.string.error_server_title)
                                     descState.text = getString(R.string.error_server_desc)
-                                    imageState.setImageResource(android.R.drawable.ic_delete)
+                                    imageState.setImageResource(android.R.drawable.ic_notification_clear_all)
                                 }
 
                                 else -> {

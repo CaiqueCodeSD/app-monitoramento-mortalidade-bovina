@@ -3,7 +3,7 @@ package com.example.myfirstapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfirstapp.model.Registro
-import com.example.myfirstapp.repository.RegistroRepository
+import com.example.myfirstapp.repository.RegistroRepositoryInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +18,7 @@ sealed class RegistroUiState {
 }
 
 class RegistroViewModel(
-    private val repository: RegistroRepository
+    private val repository: RegistroRepositoryInterface
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<RegistroUiState>(RegistroUiState.Loading)
