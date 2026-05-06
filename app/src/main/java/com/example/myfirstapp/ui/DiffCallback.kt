@@ -1,5 +1,7 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.ui
+
 import androidx.recyclerview.widget.DiffUtil
+import com.example.myfirstapp.model.Registro
 
 class DiffCallback : DiffUtil.ItemCallback<Registro>() {
 

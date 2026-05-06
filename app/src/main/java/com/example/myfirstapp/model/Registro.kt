@@ -1,4 +1,4 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.model
 
 data class Registro (
     val id: Int,
