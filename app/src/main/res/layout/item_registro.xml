@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/ic_launcher_foreground" />
 
     <TextView
         android:id="@+id/tvData"
@@ -35,5 +35,19 @@
         android:layout_height="wrap_content"
         android:text="Observação: ..."
         android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tvLatitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Latitude: Não capturada"/>
+
+    <TextView
+        android:id="@+id/tvLongitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Longitude: Não capturada"/>
 
 </LinearLayout>
