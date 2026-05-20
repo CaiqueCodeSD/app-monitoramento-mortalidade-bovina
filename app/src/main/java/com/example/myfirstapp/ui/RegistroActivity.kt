@@ -15,14 +15,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.myfirstapp.databinding.ActivityRegistroBinding
 import com.example.myfirstapp.model.Registro
+import com.example.myfirstapp.viewmodel.RegistroViewModel
+import com.example.myfirstapp.viewmodel.ValidacaoFormularioState
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class RegistroActivity : AppCompatActivity() {
+
+    private val viewModel: RegistroViewModel by viewModel()
 
     private lateinit var binding: ActivityRegistroBinding
 
@@ -111,7 +116,7 @@ class RegistroActivity : AppCompatActivity() {
 
     private fun configurarClicks() {
 
-        // data
+        // Data
         binding.etData.setOnClickListener {
 
             abrirSeletorData()
@@ -135,123 +140,78 @@ class RegistroActivity : AppCompatActivity() {
         // Botão salvar
         binding.btnSalvar.setOnClickListener {
 
-            if (validarFormulario()) {
-
-                val registro = Registro(
-                    id = System.currentTimeMillis().toInt(),
+            val validacao =
+                viewModel.validarFormulario(
                     data = binding.etData.text.toString(),
                     causa = binding.etCausa.text.toString(),
                     observacao =
                         binding.etObservacao.text.toString(),
-                    fotoUri = imageUri.toString(),
-                    latitude = latitude!!,
-                    longitude = longitude!!
+                    fotoUri = imageUri?.toString(),
+                    latitude = latitude,
+                    longitude = longitude
                 )
 
-                val resultIntent = Intent()
+            when (validacao) {
 
-                resultIntent.putExtra(
-                    "novo_registro",
-                    registro
-                )
+                is ValidacaoFormularioState.Valido -> {
 
-                setResult(
-                    Activity.RESULT_OK,
-                    resultIntent
-                )
+                    val registro = Registro(
+                        id = System.currentTimeMillis().toInt(),
+                        data = binding.etData.text.toString(),
+                        causa = binding.etCausa.text.toString(),
+                        observacao =
+                            binding.etObservacao.text.toString(),
+                        fotoUri = imageUri.toString(),
+                        latitude = latitude!!,
+                        longitude = longitude!!
+                    )
 
-                Toast.makeText(
-                    this,
-                    "Registro salvo com sucesso!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    val resultIntent = Intent()
 
-                finish()
+                    resultIntent.putExtra(
+                        "novo_registro",
+                        registro
+                    )
+
+                    setResult(
+                        Activity.RESULT_OK,
+                        resultIntent
+                    )
+
+                    Toast.makeText(
+                        this,
+                        "Registro salvo com sucesso!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    finish()
+                }
+
+                is ValidacaoFormularioState.Invalido -> {
+
+                    binding.tilData.error =
+                        validacao.erroData
+
+                    binding.tilCausa.error =
+                        validacao.erroCausa
+
+                    binding.tilObservacao.error =
+                        validacao.erroObservacao
+
+                    binding.tvErroFoto.visibility =
+                        if (validacao.erroFoto)
+                            View.VISIBLE
+                        else
+                            View.GONE
+
+                    binding.tvErroLocalizacao.visibility =
+                        if (validacao.erroLocalizacao)
+                            View.VISIBLE
+                        else
+                            View.GONE
+                }
             }
         }
-    }
-
-    private fun validarFormulario(): Boolean {
-
-        var valido = true
-
-        val data =
-            binding.etData.text.toString().trim()
-
-        val causa =
-            binding.etCausa.text.toString().trim()
-
-        val observacao =
-            binding.etObservacao.text.toString().trim()
-
-        // DATA
-        if (data.isEmpty()) {
-
-            binding.tilData.error =
-                "Informe a data"
-
-            valido = false
-
-        } else {
-
-            binding.tilData.error = null
-        }
-
-        // Causa
-        if (causa.isEmpty()) {
-
-            binding.tilCausa.error =
-                "Informe a suspeita da morte"
-
-            valido = false
-
-        } else {
-
-            binding.tilCausa.error = null
-        }
-
-        // Observação
-        if (observacao.isEmpty()) {
-
-            binding.tilObservacao.error =
-                "Informe uma observação adicional"
-
-            valido = false
-
-        } else {
-
-            binding.tilObservacao.error = null
-        }
-
-        // Foto
-        if (imageUri == null) {
-
-            binding.tvErroFoto.visibility =
-                View.VISIBLE
-
-            valido = false
-
-        } else {
-
-            binding.tvErroFoto.visibility =
-                View.GONE
-        }
-
-        // Localização
-        if (latitude == null || longitude == null) {
-
-            binding.tvErroLocalizacao.visibility =
-                View.VISIBLE
-
-            valido = false
-
-        } else {
-
-            binding.tvErroLocalizacao.visibility =
-                View.GONE
-        }
-
-        return valido
     }
 
     private fun verificarPermissaoCamera():

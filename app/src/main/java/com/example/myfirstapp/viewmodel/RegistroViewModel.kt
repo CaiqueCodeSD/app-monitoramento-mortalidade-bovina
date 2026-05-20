@@ -18,12 +18,84 @@ sealed class RegistroUiState {
     data class Error(val message: String) : RegistroUiState()
 }
 
+sealed class ValidacaoFormularioState {
+
+    object Valido : ValidacaoFormularioState()
+
+    data class Invalido(
+        val erroData: String? = null,
+        val erroCausa: String? = null,
+        val erroObservacao: String? = null,
+        val erroFoto: Boolean = false,
+        val erroLocalizacao: Boolean = false
+    ) : ValidacaoFormularioState()
+}
+
 class RegistroViewModel(
     private val repository: RegistroRepositoryInterface
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<RegistroUiState>(RegistroUiState.Loading)
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
+
+    fun validarFormulario(
+        data: String,
+        causa: String,
+        observacao: String,
+        fotoUri: String?,
+        latitude: Double?,
+        longitude: Double?
+    ): ValidacaoFormularioState {
+
+        var erroData: String? = null
+        var erroCausa: String? = null
+        var erroObservacao: String? = null
+        var erroFoto = false
+        var erroLocalizacao = false
+
+        if (data.isBlank()) {
+            erroData = "Informe a data"
+        }
+
+        if (causa.isBlank()) {
+            erroCausa = "Informe a suspeita da morte"
+        }
+
+        if (observacao.isBlank()) {
+            erroObservacao =
+                "Informe uma observação adicional"
+        }
+
+        if (fotoUri == null) {
+            erroFoto = true
+        }
+
+        if (latitude == null || longitude == null) {
+            erroLocalizacao = true
+        }
+
+        val possuiErro =
+            erroData != null ||
+                    erroCausa != null ||
+                    erroObservacao != null ||
+                    erroFoto ||
+                    erroLocalizacao
+
+        return if (possuiErro) {
+
+            ValidacaoFormularioState.Invalido(
+                erroData = erroData,
+                erroCausa = erroCausa,
+                erroObservacao = erroObservacao,
+                erroFoto = erroFoto,
+                erroLocalizacao = erroLocalizacao
+            )
+
+        } else {
+
+            ValidacaoFormularioState.Valido
+        }
+    }
 
     fun salvarRegistro(registro: Registro) {
 

@@ -3,6 +3,8 @@ package com.example.myfirstapp.repository
 import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.network.ApiService
 import retrofit2.HttpException
+import com.example.myfirstapp.repository.mapper.toDomain
+import com.example.myfirstapp.repository.mapper.toDto
 
 class RegistroRepository(
     private val apiService: ApiService
@@ -20,9 +22,14 @@ class RegistroRepository(
 
             if (response.isSuccessful) {
 
-                registrosLocais.addAll(
-                    response.body() ?: emptyList()
-                )
+                response.body()?.let { registrosDto ->
+
+                    registrosLocais.addAll(
+                        registrosDto.map { dto ->
+                            dto.toDomain()
+                        }
+                    )
+                }
 
             } else {
 
@@ -40,7 +47,9 @@ class RegistroRepository(
     ) {
 
         // Post fake
-        apiService.salvarRegistro(registro)
+        apiService.salvarRegistro(
+            registro.toDto()
+        )
 
         // Adiciona localmente
         registrosLocais.add(0, registro)
