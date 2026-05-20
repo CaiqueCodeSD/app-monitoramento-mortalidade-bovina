@@ -1,8 +1,6 @@
-package com.example.myfirstapp.model
+package com.example.myfirstapp.network.dto
 
-import java.io.Serializable
-
-data class Registro (
+data class RegistroDto(
     val id: Int,
     val data: String,
     val causa: String,
@@ -10,4 +8,4 @@ data class Registro (
     val fotoUri: String?,
     val latitude: Double?,
     val longitude: Double?
-) : Serializable
+)

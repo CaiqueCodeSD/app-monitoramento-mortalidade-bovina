@@ -8,6 +8,11 @@ android {
         version = release(36) {
             minorApiLevel = 1
         }
+
+        buildFeatures {
+            viewBinding = true
+        }
+
     }
 
     defaultConfig {
@@ -36,6 +41,9 @@ android {
 }
 
 dependencies {
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.material:material:1.13.0")
     implementation("io.insert-koin:koin-android:4.2.1")
     implementation("com.facebook.shimmer:shimmer:0.5.0")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
