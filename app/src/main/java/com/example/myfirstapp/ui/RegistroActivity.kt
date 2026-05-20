@@ -52,6 +52,12 @@ class RegistroActivity : AppCompatActivity() {
 
         private const val KEY_OBSERVACAO =
             "key_observacao"
+
+        private const val KEY_LATITUDE =
+            "key_latitude"
+
+        private const val KEY_LONGITUDE =
+            "key_longitude"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -351,6 +357,21 @@ class RegistroActivity : AppCompatActivity() {
             KEY_OBSERVACAO,
             binding.etObservacao.text.toString()
         )
+
+        latitude?.let {
+            outState.putDouble(
+                KEY_LATITUDE,
+                it
+            )
+        }
+
+        longitude?.let {
+            outState.putDouble(
+                KEY_LONGITUDE,
+                it
+            )
+        }
+
     }
 
     private fun restaurarEstado(
@@ -385,6 +406,25 @@ class RegistroActivity : AppCompatActivity() {
             binding.imgPreview.setImageURI(null)
 
             binding.imgPreview.setImageURI(imageUri)
+        }
+
+        if (
+            savedInstanceState.containsKey(KEY_LATITUDE)
+            &&
+            savedInstanceState.containsKey(KEY_LONGITUDE)
+        ) {
+
+            latitude =
+                savedInstanceState.getDouble(KEY_LATITUDE)
+
+            longitude =
+                savedInstanceState.getDouble(KEY_LONGITUDE)
+
+            binding.tvLatitude.text =
+                "Latitude: $latitude"
+
+            binding.tvLongitude.text =
+                "Longitude: $longitude"
         }
     }
 }
