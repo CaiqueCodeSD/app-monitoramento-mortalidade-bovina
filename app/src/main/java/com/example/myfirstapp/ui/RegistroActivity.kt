@@ -13,17 +13,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.myfirstapp.databinding.ActivityRegistroBinding
-import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.viewmodel.RegistroViewModel
-import com.example.myfirstapp.viewmodel.ValidacaoFormularioState
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.lifecycle.Lifecycle
+import androidx.core.widget.doAfterTextChanged
+import com.example.myfirstapp.model.Registro
+import com.example.myfirstapp.viewmodel.RegistroEvent
+import com.example.myfirstapp.viewmodel.RegistroFormState
 
 class RegistroActivity : AppCompatActivity() {
 
@@ -34,30 +40,54 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient:
             FusedLocationProviderClient
 
-    private var imageUri: Uri? = null
+    private fun finalizarRegistro(
+        registro: Registro
+    ) {
 
-    private var latitude: Double? = null
-    private var longitude: Double? = null
+        val resultIntent = Intent()
 
-    companion object {
+        resultIntent.putExtra(
+            "novo_registro",
+            registro
+        )
 
-        private const val KEY_IMAGE_URI =
-            "key_image_uri"
+        setResult(
+            Activity.RESULT_OK,
+            resultIntent
+        )
 
-        private const val KEY_DATA =
-            "key_data"
+        Toast.makeText(
+            this,
+            "Registro salvo com sucesso!",
+            Toast.LENGTH_SHORT
+        ).show()
 
-        private const val KEY_CAUSA =
-            "key_causa"
 
-        private const val KEY_OBSERVACAO =
-            "key_observacao"
+        finish()
+    }
 
-        private const val KEY_LATITUDE =
-            "key_latitude"
+    private fun configurarCamposFormulario() {
 
-        private const val KEY_LONGITUDE =
-            "key_longitude"
+        binding.etData.doAfterTextChanged {
+
+            viewModel.onDataChanged(
+                it?.toString().orEmpty()
+            )
+        }
+
+        binding.etCausa.doAfterTextChanged {
+
+            viewModel.onCausaChanged(
+                it?.toString().orEmpty()
+            )
+        }
+
+        binding.etObservacao.doAfterTextChanged {
+
+            viewModel.onObservacaoChanged(
+                it?.toString().orEmpty()
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,9 +104,169 @@ class RegistroActivity : AppCompatActivity() {
             LocationServices
                 .getFusedLocationProviderClient(this)
 
-        restaurarEstado(savedInstanceState)
-
         configurarClicks()
+
+        configurarCamposFormulario()
+
+        observarEventos()
+
+        observarFormulario()
+
+    }
+
+    private fun renderizarFormulario(
+        state: RegistroFormState
+    ) {
+
+        binding.tilData.error =
+            state.erroData
+
+        binding.tilCausa.error =
+            state.erroCausa
+
+        binding.tilObservacao.error =
+            state.erroObservacao
+
+        binding.tvErroFoto.visibility =
+            if (state.erroFoto)
+                View.VISIBLE
+            else
+                View.GONE
+
+        binding.tvErroLocalizacao.visibility =
+            if (state.erroLocalizacao)
+                View.VISIBLE
+            else
+                View.GONE
+
+        state.imageUri?.let { uriString ->
+
+            binding.imgPreview.setImageURI(null)
+
+            binding.imgPreview.setImageURI(
+                Uri.parse(uriString)
+            )
+        }
+
+        if (
+            binding.etData.text.toString()
+            != state.data
+        ) {
+
+            binding.etData.setText(state.data)
+        }
+
+        if (
+            binding.etCausa.text.toString()
+            != state.causa
+        ) {
+
+            binding.etCausa.setText(state.causa)
+        }
+
+        if (
+            binding.etObservacao.text.toString()
+            != state.observacao
+        ) {
+
+            binding.etObservacao.setText(
+                state.observacao
+            )
+        }
+
+        if (
+            state.latitude != null &&
+            state.longitude != null
+        ) {
+
+            binding.tvLatitude.text =
+                "Latitude: ${state.latitude}"
+
+            binding.tvLongitude.text =
+                "Longitude: ${state.longitude}"
+        }
+    }
+
+    private fun observarFormulario() {
+
+        lifecycleScope.launch {
+
+            repeatOnLifecycle(
+                Lifecycle.State.STARTED
+            ) {
+                viewModel.formState.collect { state ->
+
+                    renderizarFormulario(state)
+                }
+            }
+        }
+    }
+
+    private fun observarEventos() {
+
+        lifecycleScope.launch {
+
+            repeatOnLifecycle(
+                Lifecycle.State.STARTED
+            ) {
+
+                viewModel.event.collect { event ->
+
+                    when (event) {
+
+                        is RegistroEvent.SalvarRegistro -> {
+
+                            finalizarRegistro(
+                                event.registro
+                            )
+                        }
+
+                        RegistroEvent.AbrirCamera -> {
+
+                            if (verificarPermissaoCamera()) {
+
+                                abrirCamera()
+
+                            } else {
+
+                                permissionLauncher.launch(
+                                    Manifest.permission.CAMERA
+                                )
+                            }
+                        }
+
+                        RegistroEvent.AbrirDatePicker -> {
+
+                            abrirSeletorData()
+                        }
+
+                        RegistroEvent.SolicitarPermissaoCamera -> {
+
+                            if (verificarPermissaoCamera()) {
+
+                                viewModel.onPermissaoCameraConcedida()
+
+                            } else {
+
+                                permissionLauncher.launch(
+                                    Manifest.permission.CAMERA
+                                )
+                            }
+                        }
+
+                        RegistroEvent.SolicitarLocalizacao -> {
+                            if (verificarPermissaoLocalizacao()) {
+                                capturarLocalizacao()
+                            } else {
+                                locationPermissionLauncher.launch(
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun abrirSeletorData() {
@@ -106,10 +296,8 @@ class RegistroActivity : AppCompatActivity() {
                         Locale.getDefault()
                     )
 
-                binding.etData.setText(
-                    formato.format(
-                        dataSelecionada.time
-                    )
+                viewModel.onDataChanged(
+                    formato.format(dataSelecionada.time)
                 )
             },
             ano,
@@ -125,98 +313,18 @@ class RegistroActivity : AppCompatActivity() {
         // Data
         binding.etData.setOnClickListener {
 
-            abrirSeletorData()
+            viewModel.onDataClicked()
         }
 
         // Botão foto
         binding.btnFoto.setOnClickListener {
 
-            if (verificarPermissaoCamera()) {
-
-                abrirCamera()
-
-            } else {
-
-                permissionLauncher.launch(
-                    Manifest.permission.CAMERA
-                )
-            }
+            viewModel.onFotoClicked()
         }
 
         // Botão salvar
         binding.btnSalvar.setOnClickListener {
-
-            val validacao =
-                viewModel.validarFormulario(
-                    data = binding.etData.text.toString(),
-                    causa = binding.etCausa.text.toString(),
-                    observacao =
-                        binding.etObservacao.text.toString(),
-                    fotoUri = imageUri?.toString(),
-                    latitude = latitude,
-                    longitude = longitude
-                )
-
-            when (validacao) {
-
-                is ValidacaoFormularioState.Valido -> {
-
-                    val registro = Registro(
-                        id = System.currentTimeMillis().toInt(),
-                        data = binding.etData.text.toString(),
-                        causa = binding.etCausa.text.toString(),
-                        observacao =
-                            binding.etObservacao.text.toString(),
-                        fotoUri = imageUri.toString(),
-                        latitude = latitude!!,
-                        longitude = longitude!!
-                    )
-
-                    val resultIntent = Intent()
-
-                    resultIntent.putExtra(
-                        "novo_registro",
-                        registro
-                    )
-
-                    setResult(
-                        Activity.RESULT_OK,
-                        resultIntent
-                    )
-
-                    Toast.makeText(
-                        this,
-                        "Registro salvo com sucesso!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    finish()
-                }
-
-                is ValidacaoFormularioState.Invalido -> {
-
-                    binding.tilData.error =
-                        validacao.erroData
-
-                    binding.tilCausa.error =
-                        validacao.erroCausa
-
-                    binding.tilObservacao.error =
-                        validacao.erroObservacao
-
-                    binding.tvErroFoto.visibility =
-                        if (validacao.erroFoto)
-                            View.VISIBLE
-                        else
-                            View.GONE
-
-                    binding.tvErroLocalizacao.visibility =
-                        if (validacao.erroLocalizacao)
-                            View.VISIBLE
-                        else
-                            View.GONE
-                }
-            }
+            viewModel.onSalvarClicked()
         }
     }
 
@@ -245,7 +353,7 @@ class RegistroActivity : AppCompatActivity() {
 
             if (granted) {
 
-                abrirCamera()
+                viewModel.onPermissaoCameraConcedida()
             }
         }
 
@@ -264,27 +372,13 @@ class RegistroActivity : AppCompatActivity() {
         registerForActivityResult(
             ActivityResultContracts.TakePicture()
         ) { success ->
-
             if (success) {
-
-                imageUri?.let {
-
-                    binding.imgPreview.setImageURI(null)
-
-                    binding.imgPreview.setImageURI(it)
-                }
-
-                if (verificarPermissaoLocalizacao()) {
-
-                    capturarLocalizacao()
-
-                } else {
-
-                    locationPermissionLauncher.launch(
-                        Manifest.permission
-                            .ACCESS_FINE_LOCATION
-                    )
-                }
+                // A Activity avisa a ViewModel: "Foto capturada com sucesso!"
+                viewModel.formState.value
+                    .pendingPhotoUri
+                    ?.let { uri ->
+                        viewModel.onFotoCapturada(uri)
+                    }
             }
         }
 
@@ -296,13 +390,17 @@ class RegistroActivity : AppCompatActivity() {
             cacheDir
         )
 
-        imageUri = FileProvider.getUriForFile(
+        val imageUri = FileProvider.getUriForFile(
             this,
             "${packageName}.provider",
             imageFile
         )
 
-        cameraLauncher.launch(imageUri!!)
+        viewModel.onNovaFotoIniciada(
+            imageUri.toString()
+        )
+
+        cameraLauncher.launch(imageUri)
     }
 
     private fun capturarLocalizacao() {
@@ -321,110 +419,12 @@ class RegistroActivity : AppCompatActivity() {
 
                 if (location != null) {
 
-                    latitude = location.latitude
-                    longitude = location.longitude
-
-                    binding.tvLatitude.text =
-                        "Latitude: $latitude"
-
-                    binding.tvLongitude.text =
-                        "Longitude: $longitude"
+                    viewModel.onLocalizacaoObtida(
+                        location.latitude,
+                        location.longitude
+                    )
                 }
             }
     }
 
-    override fun onSaveInstanceState(
-        outState: Bundle
-    ) {
-        super.onSaveInstanceState(outState)
-
-        outState.putString(
-            KEY_IMAGE_URI,
-            imageUri?.toString()
-        )
-
-        outState.putString(
-            KEY_DATA,
-            binding.etData.text.toString()
-        )
-
-        outState.putString(
-            KEY_CAUSA,
-            binding.etCausa.text.toString()
-        )
-
-        outState.putString(
-            KEY_OBSERVACAO,
-            binding.etObservacao.text.toString()
-        )
-
-        latitude?.let {
-            outState.putDouble(
-                KEY_LATITUDE,
-                it
-            )
-        }
-
-        longitude?.let {
-            outState.putDouble(
-                KEY_LONGITUDE,
-                it
-            )
-        }
-
-    }
-
-    private fun restaurarEstado(
-        savedInstanceState: Bundle?
-    ) {
-
-        savedInstanceState ?: return
-
-        binding.etData.setText(
-            savedInstanceState.getString(KEY_DATA)
-        )
-
-        binding.etCausa.setText(
-            savedInstanceState.getString(KEY_CAUSA)
-        )
-
-        binding.etObservacao.setText(
-            savedInstanceState.getString(
-                KEY_OBSERVACAO
-            )
-        )
-
-        val savedImageUri =
-            savedInstanceState.getString(
-                KEY_IMAGE_URI
-            )
-
-        if (savedImageUri != null) {
-
-            imageUri = Uri.parse(savedImageUri)
-
-            binding.imgPreview.setImageURI(null)
-
-            binding.imgPreview.setImageURI(imageUri)
-        }
-
-        if (
-            savedInstanceState.containsKey(KEY_LATITUDE)
-            &&
-            savedInstanceState.containsKey(KEY_LONGITUDE)
-        ) {
-
-            latitude =
-                savedInstanceState.getDouble(KEY_LATITUDE)
-
-            longitude =
-                savedInstanceState.getDouble(KEY_LONGITUDE)
-
-            binding.tvLatitude.text =
-                "Latitude: $latitude"
-
-            binding.tvLongitude.text =
-                "Longitude: $longitude"
-        }
-    }
 }

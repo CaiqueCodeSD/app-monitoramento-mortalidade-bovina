@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.repository.RegistroRepositoryInterface
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
+import kotlinx.coroutines.flow.asSharedFlow
 
 sealed class RegistroUiState {
     object Loading : RegistroUiState()
@@ -18,17 +20,51 @@ sealed class RegistroUiState {
     data class Error(val message: String) : RegistroUiState()
 }
 
-sealed class ValidacaoFormularioState {
+data class RegistroFormState(
 
-    object Valido : ValidacaoFormularioState()
+    val data: String = "",
 
-    data class Invalido(
-        val erroData: String? = null,
-        val erroCausa: String? = null,
-        val erroObservacao: String? = null,
-        val erroFoto: Boolean = false,
-        val erroLocalizacao: Boolean = false
-    ) : ValidacaoFormularioState()
+    val causa: String = "",
+
+    val observacao: String = "",
+
+    val erroData: String? = null,
+
+    val erroCausa: String? = null,
+
+    val erroObservacao: String? = null,
+
+    val erroFoto: Boolean = false,
+
+    val erroLocalizacao: Boolean = false,
+
+    val imageUri: String? = null,
+
+    val pendingPhotoUri: String? = null,
+
+    val latitude: Double? = null,
+
+    val longitude: Double? = null,
+
+    )
+
+
+
+sealed class RegistroEvent {
+
+    data class SalvarRegistro(
+        val registro: Registro
+    ) : RegistroEvent()
+
+    object AbrirCamera : RegistroEvent()
+
+    object AbrirDatePicker : RegistroEvent()
+
+    object SolicitarPermissaoCamera :
+        RegistroEvent()
+
+    object SolicitarLocalizacao :
+        RegistroEvent()
 }
 
 class RegistroViewModel(
@@ -38,14 +74,49 @@ class RegistroViewModel(
     private val _uiState = MutableStateFlow<RegistroUiState>(RegistroUiState.Loading)
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
-    fun validarFormulario(
-        data: String,
-        causa: String,
-        observacao: String,
-        fotoUri: String?,
-        latitude: Double?,
-        longitude: Double?
-    ): ValidacaoFormularioState {
+    private val _event =
+        MutableSharedFlow<RegistroEvent>(
+            extraBufferCapacity = 1
+        )
+
+    val event = _event.asSharedFlow()
+
+    private val _formState =
+        MutableStateFlow(
+            RegistroFormState()
+        )
+
+    val formState:
+            StateFlow<RegistroFormState> =
+        _formState.asStateFlow()
+
+    private fun criarRegistro(
+        state: RegistroFormState
+    ): Registro {
+
+        return Registro(
+            id = System.currentTimeMillis().toInt(),
+            data = state.data,
+            causa = state.causa,
+            observacao = state.observacao,
+            fotoUri = state.imageUri,
+            latitude = state.latitude,
+            longitude = state.longitude
+        )
+    }
+
+    private fun RegistroFormState.possuiErro(): Boolean {
+
+        return erroData != null ||
+                erroCausa != null ||
+                erroObservacao != null ||
+                erroFoto ||
+                erroLocalizacao
+    }
+
+    private fun validarFormulario(
+        state: RegistroFormState
+    ): RegistroFormState {
 
         var erroData: String? = null
         var erroCausa: String? = null
@@ -53,47 +124,152 @@ class RegistroViewModel(
         var erroFoto = false
         var erroLocalizacao = false
 
-        if (data.isBlank()) {
+        if (state.data.isBlank()) {
             erroData = "Informe a data"
         }
 
-        if (causa.isBlank()) {
+        if (state.causa.isBlank()) {
             erroCausa = "Informe a suspeita da morte"
         }
 
-        if (observacao.isBlank()) {
+        if (state.observacao.isBlank()) {
             erroObservacao =
                 "Informe uma observação adicional"
         }
 
-        if (fotoUri == null) {
+        if (state.imageUri == null) {
             erroFoto = true
         }
 
-        if (latitude == null || longitude == null) {
+        if (
+            state.latitude == null ||
+            state.longitude == null
+        ) {
             erroLocalizacao = true
         }
 
-        val possuiErro =
-            erroData != null ||
-                    erroCausa != null ||
-                    erroObservacao != null ||
-                    erroFoto ||
-                    erroLocalizacao
+        return state.copy(
+            erroData = erroData,
+            erroCausa = erroCausa,
+            erroObservacao = erroObservacao,
+            erroFoto = erroFoto,
+            erroLocalizacao = erroLocalizacao
+        )
+    }
 
-        return if (possuiErro) {
+    fun onPermissaoCameraConcedida() {
 
-            ValidacaoFormularioState.Invalido(
-                erroData = erroData,
-                erroCausa = erroCausa,
-                erroObservacao = erroObservacao,
-                erroFoto = erroFoto,
-                erroLocalizacao = erroLocalizacao
+        viewModelScope.launch {
+
+            _event.emit(
+                RegistroEvent.AbrirCamera
+            )
+        }
+    }
+
+    fun onFotoClicked() {
+
+        viewModelScope.launch {
+
+            _event.emit(
+                RegistroEvent.SolicitarPermissaoCamera
+            )
+        }
+    }
+
+    fun onDataClicked() {
+
+        viewModelScope.launch {
+
+            _event.emit(
+                RegistroEvent.AbrirDatePicker
+            )
+        }
+    }
+
+    fun onNovaFotoIniciada(uri: String) {
+
+        _formState.value =
+            _formState.value.copy(
+                pendingPhotoUri = uri
+            )
+    }
+
+    fun onObservacaoChanged(
+        observacao: String
+    ) {
+
+        _formState.value =
+            _formState.value.copy(
+                observacao = observacao
+            )
+    }
+
+    fun onCausaChanged(causa: String) {
+
+        _formState.value =
+            _formState.value.copy(
+                causa = causa
+            )
+    }
+
+    fun onDataChanged(data: String) {
+
+        _formState.value =
+            _formState.value.copy(
+                data = data
+            )
+    }
+
+    fun onLocalizacaoObtida(
+        latitude: Double,
+        longitude: Double
+    ) {
+
+        _formState.value =
+            _formState.value.copy(
+                latitude = latitude,
+                longitude = longitude
+            )
+    }
+
+    fun onFotoCapturada(uri: String) {
+        _formState.value =
+            _formState.value.copy(
+                imageUri = uri,
+                pendingPhotoUri = null
             )
 
-        } else {
+        viewModelScope.launch {
+            _event.emit(RegistroEvent.SolicitarLocalizacao)
+        }
+    }
 
-            ValidacaoFormularioState.Valido
+    fun onSalvarClicked() {
+
+        val estadoValidado =
+            validarFormulario(
+                _formState.value
+            )
+
+        _formState.value = estadoValidado
+
+        if (estadoValidado.possuiErro()) {
+            return
+        }
+
+        val registro =
+            criarRegistro(
+                estadoValidado
+            )
+
+        viewModelScope.launch {
+
+            _event.emit(
+                RegistroEvent.SalvarRegistro(
+                    registro
+                )
+            )
         }
     }
 
