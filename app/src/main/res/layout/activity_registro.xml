@@ -1,39 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FAF7F7"
     android:fitsSystemWindows="true">
 
-    <!-- SCROLL DO FORMULÁRIO -->
 
     <androidx.core.widget.NestedScrollView
+
         android:id="@+id/scrollFormulario"
+
         android:layout_width="0dp"
         android:layout_height="0dp"
+
         android:fillViewport="true"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/btnSalvar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+
         <LinearLayout
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
 
-            <!-- DATA -->
+            android:orientation="vertical"
+            android:padding="16dp">
+
+
+            <!-- FOTO -->
 
             <ImageView
+
                 android:id="@+id/imgPreview"
+
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
+
+                android:layout_marginTop="8dp"
+
+                android:background="@drawable/bg_foto"
+
+                android:scaleType="centerCrop"
+
+                android:clipToOutline="true"
+
+                android:contentDescription="Foto do animal"/>
+
+
+            <com.google.android.material.button.MaterialButton
+
+                android:id="@+id/btnFoto"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="52dp"
+
                 android:layout_marginTop="12dp"
-                android:background="@color/lightGray"
-                android:contentDescription="Pré-visualização da foto"
-                android:scaleType="fitXY"/>
+
+                android:text="Tirar Foto"
+
+                android:textSize="16sp"
+
+                android:background="@drawable/bg_button"
+
+                app:backgroundTint="@null"/>
 
             <TextView
                 android:id="@+id/tvErroFoto"
@@ -44,122 +81,221 @@
                 android:textColor="#8E1F25"
                 android:visibility="gone"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnFoto"
+            <!-- LOCALIZAÇÃO -->
+
+            <LinearLayout
+
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Tirar Foto"
-                app:backgroundTint="#8E1F25"
-                app:cornerRadius="4dp" />
 
-            <TextView
-                android:id="@+id/tvLatitude"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Latitude: Não capturada" />
 
-            <TextView
-                android:id="@+id/tvLongitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Longitude: Não capturada" />
+                android:orientation="vertical"
 
-            <TextView
-                android:id="@+id/tvErroLocalizacao"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Localização obrigatória!"
-                android:textColor="@android:color/holo_red_dark"
-                android:visibility="gone"/>
+                android:layout_marginTop="20dp"
+
+                android:padding="16dp"
+
+                android:background="@drawable/bg_localizacao">
+
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:text="📍 Localização"
+
+                    android:textStyle="bold"
+
+                    android:textSize="16sp"/>
+
+
+                <TextView
+
+                    android:id="@+id/tvLatitude"
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="8dp"
+
+                    android:text="Latitude: Não capturada"/>
+
+
+                <TextView
+
+                    android:id="@+id/tvLongitude"
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:text="Longitude: Não capturada"/>
+
+                <TextView
+                    android:id="@+id/tvErroLocalizacao"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Localização obrigatória!"
+                    android:textColor="#8E1F25"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
+
+
+
+            <!-- DATA -->
 
             <com.google.android.material.textfield.TextInputLayout
+
                 android:id="@+id/tilData"
+
                 android:layout_width="match_parent"
+
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
-                android:hint="Data">
+
+                android:layout_marginTop="20dp"
+
+                android:hint="Data"
+
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+
 
                 <com.google.android.material.textfield.TextInputEditText
+
                     android:id="@+id/etData"
+
                     android:layout_width="match_parent"
+
                     android:layout_height="wrap_content"
+
                     android:focusable="false"
-                    android:clickable="true"
-                    android:cursorVisible="false"
-                    android:inputType="none"/>
+
+                    android:clickable="true"/>
+
+
             </com.google.android.material.textfield.TextInputLayout>
+
+
 
             <!-- CAUSA -->
 
+
             <com.google.android.material.textfield.TextInputLayout
+
                 android:id="@+id/tilCausa"
+
                 android:layout_width="match_parent"
+
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Suspeita da morte">
+
+                android:layout_marginTop="12dp"
+
+                android:hint="Suspeita da morte"
+
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+
 
                 <com.google.android.material.textfield.TextInputEditText
+
                     android:id="@+id/etCausa"
+
                     android:layout_width="match_parent"
+
                     android:layout_height="wrap_content"/>
+
+
             </com.google.android.material.textfield.TextInputLayout>
+
+
 
             <!-- OBSERVAÇÃO -->
 
+
             <com.google.android.material.textfield.TextInputLayout
+
                 android:id="@+id/tilObservacao"
+
                 android:layout_width="match_parent"
+
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Observação adicional">
+
+                android:layout_marginTop="12dp"
+
+                android:hint="Observação adicional"
+
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+
 
                 <com.google.android.material.textfield.TextInputEditText
+
                     android:id="@+id/etObservacao"
+
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minLines="3"
+
+                    android:layout_height="120dp"
+
                     android:gravity="top"
+
                     android:inputType="textMultiLine"/>
+
+
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- PREVIEW DA FOTO -->
 
-
-
-            <!-- BOTÃO FOTO -->
-
-            <!-- LATITUDE -->
-
-            <!-- LONGITUDE -->
-
-
-
-            <!-- ESPAÇO EXTRA PARA NÃO FICAR ATRÁS DO BOTÃO -->
 
             <Space
+
                 android:layout_width="match_parent"
-                android:layout_height="24dp"/>
+
+                android:layout_height="32dp"/>
+
 
         </LinearLayout>
 
+
     </androidx.core.widget.NestedScrollView>
 
-    <!-- BOTÃO FIXO NO RODAPÉ -->
+
+
+    <!-- SALVAR -->
+
 
     <com.google.android.material.button.MaterialButton
+
         android:id="@+id/btnSalvar"
+
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="12dp"
+
+        android:layout_height="56dp"
+
+        android:layout_margin="16dp"
+
         android:text="Salvar Registro"
-        app:cornerRadius="4dp"
+
+        android:textSize="16sp"
+
+        android:background="@drawable/bg_button"
+
+        app:backgroundTint="@null"
+
         app:layout_constraintBottom_toBottomOf="parent"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="#8E1F25"/>
+
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

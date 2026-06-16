@@ -5,22 +5,27 @@
     android:orientation="vertical"
     android:padding="12dp"
     android:layout_margin="8dp"
-    android:background="#FFFFFF"
-    android:elevation="2dp">
+    android:background="@drawable/bg_card_registro"
+    android:elevation="4dp">
+
 
     <ImageView
         android:id="@+id/imgFoto"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:scaleType="centerCrop"
+        android:background="@drawable/bg_imagem_registro"
+        android:clipToOutline="true"
         android:src="@drawable/ic_launcher_foreground" />
+
 
     <TextView
         android:id="@+id/tvData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:text="Data: 31/03/2026" />
+
 
     <TextView
         android:id="@+id/tvCausa"
@@ -29,12 +34,14 @@
         android:text="Causa: Doença"
         android:layout_marginTop="4dp"/>
 
+
     <TextView
         android:id="@+id/tvObservacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Observação: ..."
         android:layout_marginTop="4dp"/>
+
 
     <TextView
         android:id="@+id/tvLatitude"
@@ -43,11 +50,13 @@
         android:layout_marginTop="8dp"
         android:text="Latitude: Não capturada"/>
 
+
     <TextView
         android:id="@+id/tvLongitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:text="Longitude: Não capturada"/>
+
 
 </LinearLayout>
