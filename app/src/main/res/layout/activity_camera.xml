@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#000000">
+
+
+    <androidx.camera.view.PreviewView
+
+        android:id="@+id/viewFinder"
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"
+
+        app:scaleType="fillCenter"/>
+
+
+
+    <!-- VOLTAR -->
+
+    <ImageButton
+
+        android:id="@+id/btnVoltar"
+
+        android:layout_width="50dp"
+
+        android:layout_height="50dp"
+
+        android:layout_margin="20dp"
+
+        android:padding="12dp"
+
+        android:background="@drawable/bg_camera_button"
+
+        android:src="@drawable/ic_close"
+
+        android:contentDescription="@string/voltar"
+
+        app:tint="@android:color/white"
+
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toTopOf="parent"/>
+
+
+
+    <!-- TROCAR CAMERA -->
+
+    <ImageButton
+
+        android:id="@+id/btnTrocarCamera"
+
+        android:layout_width="50dp"
+
+        android:layout_height="50dp"
+
+        android:layout_margin="20dp"
+
+        android:padding="12dp"
+
+        android:background="@drawable/bg_camera_button"
+
+        android:src="@drawable/ic_camera_switch"
+
+        android:contentDescription="@string/trocar_c_mera"
+
+        app:tint="@android:color/white"
+
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintTop_toTopOf="parent"/>
+
+
+    <!-- CAPTURA -->
+
+    <ImageButton
+
+        android:id="@+id/btnCapturar"
+
+        android:layout_width="85dp"
+
+        android:layout_height="85dp"
+
+        android:layout_marginBottom="50dp"
+
+        android:background="@drawable/bg_camera_capture"
+
+        android:contentDescription="@string/tirar_foto"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

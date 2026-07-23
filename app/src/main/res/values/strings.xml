@@ -26,5 +26,8 @@
     <string name="error_generic_desc">
         Ocorreu um problema. Tente novamente mais tarde.
     </string>
+    <string name="trocar_c_mera">Trocar câmera</string>
+    <string name="voltar">Voltar</string>
+    <string name="tirar_foto">Tirar foto</string>
 
 </resources>

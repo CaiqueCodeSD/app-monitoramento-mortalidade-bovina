@@ -1,5 +1,6 @@
 package com.example.myfirstapp.repository.mapper
 
+import com.example.myfirstapp.data.local.RegistroEntity
 import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.network.dto.RegistroDto
 
@@ -17,6 +18,30 @@ fun RegistroDto.toDomain(): Registro {
 
 fun Registro.toDto(): RegistroDto {
     return RegistroDto(
+        id = id,
+        data = data,
+        causa = causa,
+        observacao = observacao,
+        fotoUri = fotoUri,
+        latitude = latitude,
+        longitude = longitude
+    )
+}
+
+fun RegistroEntity.toDomain() : Registro {
+    return Registro(
+        id = id,
+        data = data,
+        causa = causa,
+        observacao = observacao,
+        fotoUri = fotoUri,
+        latitude = latitude,
+        longitude = longitude
+    )
+}
+
+fun Registro.toEntity() : RegistroEntity{
+    return RegistroEntity(
         id = id,
         data = data,
         causa = causa,

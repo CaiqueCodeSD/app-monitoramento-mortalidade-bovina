@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.myfirstapp.databinding.ActivityRegistroBinding
@@ -21,7 +20,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -30,6 +28,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.viewmodel.RegistroEvent
 import com.example.myfirstapp.viewmodel.RegistroFormState
+import com.example.myfirstapp.camera.CameraActivity
 
 class RegistroActivity : AppCompatActivity() {
 
@@ -223,16 +222,12 @@ class RegistroActivity : AppCompatActivity() {
 
                         RegistroEvent.AbrirCamera -> {
 
-                            if (verificarPermissaoCamera()) {
+                            val intent = Intent(
+                                this@RegistroActivity,
+                                CameraActivity::class.java
+                            )
 
-                                abrirCamera()
-
-                            } else {
-
-                                permissionLauncher.launch(
-                                    Manifest.permission.CAMERA
-                                )
-                            }
+                            cameraLauncher.launch(intent)
                         }
 
                         RegistroEvent.AbrirDatePicker -> {
@@ -369,41 +364,34 @@ class RegistroActivity : AppCompatActivity() {
         }
 
     private val cameraLauncher =
+
         registerForActivityResult(
-            ActivityResultContracts.TakePicture()
-        ) { success ->
-            if (success) {
-                // A Activity avisa a ViewModel: "Foto capturada com sucesso!"
-                viewModel.formState.value
-                    .pendingPhotoUri
-                    ?.let { uri ->
-                        viewModel.onFotoCapturada(uri)
-                    }
+
+            ActivityResultContracts.StartActivityForResult()
+
+        ) { result ->
+
+            if (
+                result.resultCode == RESULT_OK
+            ) {
+
+                val caminho =
+
+                    result.data?.getStringExtra(
+                        "foto"
+                    )
+
+                caminho?.let {
+
+                    viewModel.onFotoCapturada(it)
+
+                }
+
             }
+
         }
 
-    private fun abrirCamera() {
-
-        val imageFile = File.createTempFile(
-            "registro_",
-            ".jpg",
-            cacheDir
-        )
-
-        val imageUri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.provider",
-            imageFile
-        )
-
-        viewModel.onNovaFotoIniciada(
-            imageUri.toString()
-        )
-
-        cameraLauncher.launch(imageUri)
-    }
-
-    private fun capturarLocalizacao() {
+        private fun capturarLocalizacao() {
 
         if (
             ContextCompat.checkSelfPermission(
