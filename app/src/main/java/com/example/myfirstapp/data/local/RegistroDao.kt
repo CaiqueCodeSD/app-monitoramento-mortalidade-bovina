@@ -9,6 +9,19 @@ import androidx.room.Query
 interface RegistroDao {
     @Query("SELECT * FROM registros")
     suspend fun buscarTodos(): List<RegistroEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserir(registro: RegistroEntity)
+
+    @Query("SELECT * FROM registros WHERE sincronizado = 0")
+    suspend fun buscarNaoSincronizados(): List<RegistroEntity>
+
+    @Query(
+        """
+    UPDATE registros
+    SET sincronizado = 1
+    WHERE id = :id
+"""
+    )
+    suspend fun marcarComoSincronizado(id: Int): Int
 }

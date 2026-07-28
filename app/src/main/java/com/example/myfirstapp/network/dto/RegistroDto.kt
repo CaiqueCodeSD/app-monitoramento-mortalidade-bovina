@@ -7,5 +7,6 @@ data class RegistroDto(
     val observacao: String,
     val fotoUri: String?,
     val latitude: Double?,
-    val longitude: Double?
+    val longitude: Double?,
+    val sincronizado: Boolean = false
 )

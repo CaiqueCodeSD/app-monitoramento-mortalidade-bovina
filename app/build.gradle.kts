@@ -42,6 +42,8 @@ android {
 }
 
 dependencies {
+    implementation("io.insert-koin:koin-androidx-workmanager:4.2.1")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

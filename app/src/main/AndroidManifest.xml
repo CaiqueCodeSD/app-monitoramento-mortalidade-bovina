@@ -47,20 +47,22 @@
 
         <provider
 
-            android:name="androidx.core.content.FileProvider"
+            android:name="androidx.startup.InitializationProvider"
 
-            android:authorities="${applicationId}.provider"
+            android:authorities="${applicationId}.androidx-startup"
 
             android:exported="false"
 
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+
+            tools:node="merge">
 
 
             <meta-data
 
-                android:name="android.support.FILE_PROVIDER_PATHS"
-
-                android:resource="@xml/file_paths"/>
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove"/>
 
 
         </provider>
