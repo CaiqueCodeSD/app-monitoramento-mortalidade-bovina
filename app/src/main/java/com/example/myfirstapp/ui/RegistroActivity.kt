@@ -9,11 +9,17 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.myfirstapp.R
 import com.example.myfirstapp.databinding.ActivityRegistroBinding
 import com.example.myfirstapp.viewmodel.RegistroViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -92,12 +98,20 @@ class RegistroActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         binding =
             ActivityRegistroBinding.inflate(
                 layoutInflater
             )
 
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         fusedLocationClient =
             LocationServices
@@ -111,6 +125,22 @@ class RegistroActivity : AppCompatActivity() {
 
         observarFormulario()
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                mostrarDialogConfirmacao()
+            }
+        })
+    }
+
+    private fun mostrarDialogConfirmacao() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.confirmar_saida_registro_titulo))
+            .setMessage(getString(R.string.confirmar_saida_registro_msg))
+            .setPositiveButton(getString(R.string.sim)) { _, _ ->
+                finish()
+            }
+            .setNegativeButton(getString(R.string.nao), null)
+            .show()
     }
 
     private fun renderizarFormulario(

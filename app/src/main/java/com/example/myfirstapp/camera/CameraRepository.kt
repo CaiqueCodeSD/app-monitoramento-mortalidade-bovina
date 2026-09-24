@@ -2,6 +2,8 @@ package com.example.myfirstapp.camera
 
 
 import android.content.Context
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -22,6 +24,26 @@ class CameraRepository {
 
     private var imageCapture:
             ImageCapture? = null
+
+    private var camera: Camera? = null
+
+    private var flashMode = ImageCapture.FLASH_MODE_OFF
+
+    fun alternarFlash(): Int {
+        flashMode = when (flashMode) {
+            ImageCapture.FLASH_MODE_OFF -> ImageCapture.FLASH_MODE_ON
+            ImageCapture.FLASH_MODE_ON -> ImageCapture.FLASH_MODE_AUTO
+            else -> ImageCapture.FLASH_MODE_OFF
+        }
+        imageCapture?.flashMode = flashMode
+        return flashMode
+    }
+
+    fun setZoom(ratio: Float) {
+        camera?.cameraControl?.setZoomRatio(ratio)
+    }
+
+    fun getZoomState() = camera?.cameraInfo?.zoomState
 
     fun capturarFoto(
         context: Context,
@@ -122,10 +144,13 @@ class CameraRepository {
 
 
             val preview = Preview.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
                 .build()
 
             imageCapture =
                 ImageCapture.Builder()
+                    .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                    .setFlashMode(flashMode)
                     .build()
 
             preview.setSurfaceProvider(
@@ -138,7 +163,7 @@ class CameraRepository {
 
 
 
-            cameraProvider?.bindToLifecycle(
+            camera = cameraProvider?.bindToLifecycle(
 
                 lifecycleOwner,
 

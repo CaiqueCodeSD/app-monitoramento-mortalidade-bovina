@@ -10,7 +10,6 @@
 
     android:background="#000000">
 
-
     <androidx.camera.view.PreviewView
 
         android:id="@+id/viewFinder"
@@ -19,9 +18,7 @@
 
         android:layout_height="match_parent"
 
-        app:scaleType="fillCenter"/>
-
-
+        app:scaleType="fillCenter" />
 
     <!-- VOLTAR -->
 
@@ -35,20 +32,19 @@
 
         android:layout_margin="20dp"
 
-        android:padding="12dp"
-
         android:background="@drawable/bg_camera_button"
-
-        android:src="@drawable/ic_close"
 
         android:contentDescription="@string/voltar"
 
-        app:tint="@android:color/white"
+        android:padding="12dp"
+
+        android:src="@drawable/ic_close"
 
         app:layout_constraintStart_toStartOf="parent"
 
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
 
+        app:tint="@android:color/white" />
 
 
     <!-- TROCAR CAMERA -->
@@ -63,20 +59,48 @@
 
         android:layout_margin="20dp"
 
-        android:padding="12dp"
-
         android:background="@drawable/bg_camera_button"
-
-        android:src="@drawable/ic_camera_switch"
 
         android:contentDescription="@string/trocar_c_mera"
 
-        app:tint="@android:color/white"
+        android:padding="12dp"
+
+        android:src="@drawable/ic_camera_switch"
 
         app:layout_constraintEnd_toEndOf="parent"
 
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
 
+        app:tint="@android:color/white" />
+
+
+    <!-- FLASH -->
+
+    <ImageButton
+
+        android:id="@+id/btnFlash"
+
+        android:layout_width="50dp"
+
+        android:layout_height="50dp"
+
+        android:layout_margin="20dp"
+
+        android:background="@drawable/bg_camera_button"
+
+        android:contentDescription="@string/flash"
+
+        android:padding="12dp"
+
+        android:src="@drawable/ic_flash"
+
+        app:layout_constraintEnd_toStartOf="@+id/btnTrocarCamera"
+
+        app:layout_constraintStart_toEndOf="@+id/btnVoltar"
+
+        app:layout_constraintTop_toTopOf="parent"
+
+        app:tint="@android:color/white" />
 
     <!-- CAPTURA -->
 
@@ -96,9 +120,8 @@
 
         app:layout_constraintBottom_toBottomOf="parent"
 
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
 
-        app:layout_constraintEnd_toEndOf="parent"/>
-
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

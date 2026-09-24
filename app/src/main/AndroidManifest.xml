@@ -87,7 +87,8 @@
 
             android:name="com.example.myfirstapp.camera.CameraActivity"
 
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="landscape" />
 
 
 

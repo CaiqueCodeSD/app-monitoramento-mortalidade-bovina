@@ -6,8 +6,7 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAF7F7"
-    android:fitsSystemWindows="true">
+    android:background="@color/backgroundWarm">
 
 
     <androidx.core.widget.NestedScrollView
@@ -78,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Adicione uma foto!"
-                android:textColor="#8E1F25"
+                android:textColor="@color/primaryColor"
                 android:visibility="gone"/>
 
             <!-- LOCALIZAÇÃO -->
@@ -140,7 +139,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="Localização obrigatória!"
-                    android:textColor="#8E1F25"
+                    android:textColor="@color/primaryColor"
                     android:visibility="gone"/>
 
             </LinearLayout>
