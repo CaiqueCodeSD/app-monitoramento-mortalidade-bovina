@@ -61,7 +61,7 @@
 
         android:background="@drawable/bg_camera_button"
 
-        android:contentDescription="@string/trocar_c_mera"
+        android:contentDescription="@string/trocar_câmera"
 
         android:padding="12dp"
 
