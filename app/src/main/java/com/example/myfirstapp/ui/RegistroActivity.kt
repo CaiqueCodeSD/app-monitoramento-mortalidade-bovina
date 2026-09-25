@@ -9,19 +9,23 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.myfirstapp.R
 import com.example.myfirstapp.databinding.ActivityRegistroBinding
 import com.example.myfirstapp.viewmodel.RegistroViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -30,6 +34,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.viewmodel.RegistroEvent
 import com.example.myfirstapp.viewmodel.RegistroFormState
+import com.example.myfirstapp.camera.CameraActivity
 
 class RegistroActivity : AppCompatActivity() {
 
@@ -93,12 +98,20 @@ class RegistroActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         binding =
             ActivityRegistroBinding.inflate(
                 layoutInflater
             )
 
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         fusedLocationClient =
             LocationServices
@@ -112,6 +125,22 @@ class RegistroActivity : AppCompatActivity() {
 
         observarFormulario()
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                mostrarDialogConfirmacao()
+            }
+        })
+    }
+
+    private fun mostrarDialogConfirmacao() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.confirmar_saida_registro_titulo))
+            .setMessage(getString(R.string.confirmar_saida_registro_msg))
+            .setPositiveButton(getString(R.string.sim)) { _, _ ->
+                finish()
+            }
+            .setNegativeButton(getString(R.string.nao), null)
+            .show()
     }
 
     private fun renderizarFormulario(
@@ -223,16 +252,12 @@ class RegistroActivity : AppCompatActivity() {
 
                         RegistroEvent.AbrirCamera -> {
 
-                            if (verificarPermissaoCamera()) {
+                            val intent = Intent(
+                                this@RegistroActivity,
+                                CameraActivity::class.java
+                            )
 
-                                abrirCamera()
-
-                            } else {
-
-                                permissionLauncher.launch(
-                                    Manifest.permission.CAMERA
-                                )
-                            }
+                            cameraLauncher.launch(intent)
                         }
 
                         RegistroEvent.AbrirDatePicker -> {
@@ -369,41 +394,34 @@ class RegistroActivity : AppCompatActivity() {
         }
 
     private val cameraLauncher =
+
         registerForActivityResult(
-            ActivityResultContracts.TakePicture()
-        ) { success ->
-            if (success) {
-                // A Activity avisa a ViewModel: "Foto capturada com sucesso!"
-                viewModel.formState.value
-                    .pendingPhotoUri
-                    ?.let { uri ->
-                        viewModel.onFotoCapturada(uri)
-                    }
+
+            ActivityResultContracts.StartActivityForResult()
+
+        ) { result ->
+
+            if (
+                result.resultCode == RESULT_OK
+            ) {
+
+                val caminho =
+
+                    result.data?.getStringExtra(
+                        "foto"
+                    )
+
+                caminho?.let {
+
+                    viewModel.onFotoCapturada(it)
+
+                }
+
             }
+
         }
 
-    private fun abrirCamera() {
-
-        val imageFile = File.createTempFile(
-            "registro_",
-            ".jpg",
-            cacheDir
-        )
-
-        val imageUri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.provider",
-            imageFile
-        )
-
-        viewModel.onNovaFotoIniciada(
-            imageUri.toString()
-        )
-
-        cameraLauncher.launch(imageUri)
-    }
-
-    private fun capturarLocalizacao() {
+        private fun capturarLocalizacao() {
 
         if (
             ContextCompat.checkSelfPermission(
