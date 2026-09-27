@@ -1,6 +1,11 @@
-package com.example.myfirstapp.network.dto
+package com.example.myfirstapp.data.local
 
-data class RegistroDto(
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "registros")
+data class RegistroEntity(
+    @PrimaryKey
     val id: Int,
     val data: String,
     val causa: String,

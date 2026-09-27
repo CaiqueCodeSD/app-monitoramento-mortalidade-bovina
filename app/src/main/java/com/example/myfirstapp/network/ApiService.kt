@@ -8,10 +8,10 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @GET("/registros")
+    @GET("registros")
     suspend fun getRegistros(): Response<List<RegistroDto>>
 
-    @POST("/registros")
+    @POST("registros")
     suspend fun salvarRegistro(
         @Body registro: RegistroDto
     ): Response<RegistroDto>

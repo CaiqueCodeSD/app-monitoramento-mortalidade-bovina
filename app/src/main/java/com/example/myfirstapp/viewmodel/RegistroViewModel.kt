@@ -40,8 +40,6 @@ data class RegistroFormState(
 
     val imageUri: String? = null,
 
-    val pendingPhotoUri: String? = null,
-
     val latitude: Double? = null,
 
     val longitude: Double? = null,
@@ -187,12 +185,21 @@ class RegistroViewModel(
         }
     }
 
-    fun onNovaFotoIniciada(uri: String) {
+    fun onFotoCapturada(uri: String) {
 
         _formState.value =
             _formState.value.copy(
-                pendingPhotoUri = uri
+                imageUri = uri
             )
+
+        viewModelScope.launch {
+
+            _event.emit(
+                RegistroEvent.SolicitarLocalizacao
+            )
+
+        }
+
     }
 
     fun onObservacaoChanged(
@@ -231,18 +238,6 @@ class RegistroViewModel(
                 latitude = latitude,
                 longitude = longitude
             )
-    }
-
-    fun onFotoCapturada(uri: String) {
-        _formState.value =
-            _formState.value.copy(
-                imageUri = uri,
-                pendingPhotoUri = null
-            )
-
-        viewModelScope.launch {
-            _event.emit(RegistroEvent.SolicitarLocalizacao)
-        }
     }
 
     fun onSalvarClicked() {
