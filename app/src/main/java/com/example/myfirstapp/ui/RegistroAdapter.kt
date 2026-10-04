@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -102,6 +103,26 @@ class RegistroAdapter :
                 R.drawable.no_picture
             )
         }
+
+        // STATUS SINCRONIZAÇÃO
+        val context = holder.itemView.context
+        if (registro.sincronizado) {
+            holder.imgStatusDot.setColorFilter(
+                ContextCompat.getColor(context, R.color.status_synced)
+            )
+            holder.tvStatusTexto.text = context.getString(R.string.status_sincronizado)
+            holder.tvStatusTexto.setTextColor(
+                ContextCompat.getColor(context, R.color.status_synced)
+            )
+        } else {
+            holder.imgStatusDot.setColorFilter(
+                ContextCompat.getColor(context, R.color.status_pending)
+            )
+            holder.tvStatusTexto.text = context.getString(R.string.status_pendente)
+            holder.tvStatusTexto.setTextColor(
+                ContextCompat.getColor(context, R.color.status_pending)
+            )
+        }
     }
 
     private fun formatarNegrito(
@@ -144,6 +165,12 @@ class RegistroAdapter :
 
         val textLongitude: TextView =
             itemView.findViewById(R.id.tvLongitude)
+
+        val imgStatusDot: ImageView =
+            itemView.findViewById(R.id.imgStatusDot)
+
+        val tvStatusTexto: TextView =
+            itemView.findViewById(R.id.tvStatusTexto)
     }
 
     class DiffCallback :

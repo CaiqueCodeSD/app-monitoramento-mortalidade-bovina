@@ -17,20 +17,29 @@ class SyncWorker(
 
         return try {
 
-            Log.d("SyncWorker", "Iniciando sincronização")
+            Log.d(
+                "SyncWorker",
+                "Iniciando sincronização"
+            )
 
             repository.sincronizarPendentes()
 
-            Log.d("SyncWorker", "Sincronização concluída com sucesso")
+            Log.d(
+                "SyncWorker",
+                "Sincronização concluída com sucesso"
+            )
 
             Result.success()
 
         } catch (e: Exception) {
 
-            Log.e("SyncWorker", "Erro durante sincronização", e)
+            Log.e(
+                "SyncWorker",
+                "Erro durante sincronização",
+                e
+            )
 
             Result.retry()
-
         }
     }
 }

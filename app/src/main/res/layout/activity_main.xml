@@ -78,17 +78,36 @@
 
     </LinearLayout>
 
-    <!-- FAB -->
+    <!-- FABs (FILTRO + NOVO REGISTRO) -->
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNovoRegistro"
+    <LinearLayout
+        android:id="@+id/layoutFabs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Novo registro"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/primaryColor"
-        app:tint="#FFFFFF"/>
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabFiltro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/filtrar_registros"
+            android:src="@drawable/ic_stack"
+            app:backgroundTint="@color/primaryColor"
+            app:tint="#FFFFFF"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabNovoRegistro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Novo registro"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="@color/primaryColor"
+            app:tint="#FFFFFF"/>
+
+    </LinearLayout>
 
 </FrameLayout>

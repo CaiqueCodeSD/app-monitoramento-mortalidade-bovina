@@ -14,6 +14,6 @@ interface ApiService {
     @POST("registros")
     suspend fun salvarRegistro(
         @Body registro: RegistroDto
-    ): Response<RegistroDto>
+    ): Response<Void>
 
 }

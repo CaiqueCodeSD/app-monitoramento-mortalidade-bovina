@@ -133,15 +133,6 @@
 
                     android:text="Longitude: Não capturada"/>
 
-                <TextView
-                    android:id="@+id/tvErroLocalizacao"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Localização obrigatória!"
-                    android:textColor="@color/primaryColor"
-                    android:visibility="gone"/>
-
             </LinearLayout>
 
 

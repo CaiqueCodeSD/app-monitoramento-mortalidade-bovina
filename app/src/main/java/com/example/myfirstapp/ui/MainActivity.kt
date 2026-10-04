@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myfirstapp.R
 import com.example.myfirstapp.databinding.ActivityMainBinding
 import com.example.myfirstapp.model.Registro
+import com.example.myfirstapp.viewmodel.OrdemExibicao
 import com.example.myfirstapp.viewmodel.RegistroUiState
 import com.example.myfirstapp.viewmodel.RegistroViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -68,7 +70,12 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // FAB
+        // FAB FILTRO
+        binding.fabFiltro.setOnClickListener {
+            mostrarDialogFiltro()
+        }
+
+        // FAB NOVO REGISTRO
         binding.fabNovoRegistro.setOnClickListener {
 
             val intent =
@@ -120,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                             layoutState.visibility =
                                 View.GONE
 
-                            binding.fabNovoRegistro.visibility =
+                            binding.layoutFabs.visibility =
                                 View.GONE
                         }
 
@@ -170,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                                 adapter.submitList(state.data)
                             }
 
-                            binding.fabNovoRegistro.visibility =
+                            binding.layoutFabs.visibility =
                                 View.VISIBLE
                         }
 
@@ -190,7 +197,7 @@ class MainActivity : AppCompatActivity() {
                             layoutState.visibility =
                                 View.VISIBLE
 
-                            binding.fabNovoRegistro.visibility =
+                            binding.layoutFabs.visibility =
                                 View.GONE
 
                             when {
@@ -257,7 +264,30 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
         viewModel.carregarRegistros()
+    }
+
+    private fun mostrarDialogFiltro() {
+        val opcoes = arrayOf(
+            getString(R.string.filtro_mais_recentes),
+            getString(R.string.filtro_mais_antigos)
+        )
+
+        val ordemAtual = viewModel.getOrdemAtual()
+        val itemSelecionado = if (ordemAtual == OrdemExibicao.MAIS_RECENTES) 0 else 1
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.filtro_titulo))
+            .setSingleChoiceItems(opcoes, itemSelecionado) { dialog, which ->
+                val novaOrdem = if (which == 0) {
+                    OrdemExibicao.MAIS_RECENTES
+                } else {
+                    OrdemExibicao.MAIS_ANTIGOS
+                }
+                viewModel.alterarOrdemExibicao(novaOrdem)
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.voltar), null)
+            .show()
     }
 }

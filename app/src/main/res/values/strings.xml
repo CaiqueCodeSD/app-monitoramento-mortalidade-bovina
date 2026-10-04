@@ -37,4 +37,27 @@
     <string name="sim">Sim</string>
     <string name="nao">Não</string>
 
+    <!-- Permissão de Localização -->
+    <string name="permissao_localizacao_titulo">Permissão de Localização</string>
+    <string name="permissao_localizacao_msg">Ative sua localização tocando em permitir acesso ao uso da localização e habilite em seu dispositivo.</string>
+    <string name="permitir">Permitir</string>
+    <string name="agora_nao">Agora não</string>
+
+    <!-- Orientação Câmera -->
+    <string name="dialog_orientacao_titulo">Gire o celular na horizontal</string>
+    <string name="dialog_orientacao_msg">Para uma melhor captura da foto, por favor gire o celular para a posição horizontal (deitado).</string>
+    <string name="desc_girar_celular">Girar celular na horizontal</string>
+    <string name="entender_abrir_camera">Entendi, abrir câmera</string>
+
+    <!-- Filtro e Ordenação -->
+    <string name="filtro_titulo">Ordenar registros por</string>
+    <string name="filtro_mais_recentes">Mais recentes</string>
+    <string name="filtro_mais_antigos">Mais antigos</string>
+    <string name="filtrar_registros">Filtrar registros</string>
+
+    <!-- Status Sincronização -->
+    <string name="status_sincronizado">Sincronizado</string>
+    <string name="status_pendente">Pendente de sincronização</string>
+    <string name="desc_status_sincronizacao">Status de sincronização</string>
+
 </resources>
