@@ -4,11 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RegistroDao {
+
     @Query("SELECT * FROM registros")
     suspend fun buscarTodos(): List<RegistroEntity>
+
+    @Query("SELECT * FROM registros")
+    fun observarTodos(): Flow<List<RegistroEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserir(registro: RegistroEntity)
@@ -18,10 +23,10 @@ interface RegistroDao {
 
     @Query(
         """
-    UPDATE registros
-    SET sincronizado = 1
-    WHERE id = :id
-"""
+        UPDATE registros
+        SET sincronizado = 1
+        WHERE id = :id
+        """
     )
     suspend fun marcarComoSincronizado(id: Int): Int
 }

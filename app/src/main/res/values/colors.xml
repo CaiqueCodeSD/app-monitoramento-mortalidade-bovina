@@ -7,5 +7,7 @@
     <color name="lightGray">#D3D3D3</color>
     <color name="backgroundWarm">#FFFDF0</color>
     <color name="surfaceWarm">#FFF9E5</color>
+    <color name="status_synced">#2E7D32</color>
+    <color name="status_pending">#F57F17</color>
 
 </resources>

@@ -8,6 +8,8 @@ import com.example.myfirstapp.repository.mapper.toDomain
 import com.example.myfirstapp.repository.mapper.toDto
 import com.example.myfirstapp.repository.mapper.toEntity
 import com.example.myfirstapp.worker.SyncScheduler
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 
 class RegistroRepository(
@@ -22,6 +24,16 @@ class RegistroRepository(
 
         return registros.map {
             it.toDomain()
+        }
+    }
+
+    override fun observarRegistros(): Flow<List<Registro>> {
+
+        return registroDao.observarTodos().map { registros ->
+
+            registros.map {
+                it.toDomain()
+            }
         }
     }
 
@@ -63,13 +75,13 @@ class RegistroRepository(
 
                 if (response.isSuccessful) {
 
-                    registroDao.marcarComoSincronizado(
+                    val linhasAtualizadas = registroDao.marcarComoSincronizado(
                         registro.id
                     )
 
                     Log.d(
                         "SyncRepository",
-                        "Registro ${registro.id} marcado como sincronizado"
+                        "Registro ${registro.id}: linhas atualizadas = $linhasAtualizadas"
                     )
                 }
 

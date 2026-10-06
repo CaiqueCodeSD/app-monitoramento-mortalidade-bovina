@@ -13,11 +13,18 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
 import kotlinx.coroutines.flow.asSharedFlow
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 sealed class RegistroUiState {
     object Loading : RegistroUiState()
     data class Success(val data: List<Registro>) : RegistroUiState()
     data class Error(val message: String) : RegistroUiState()
+}
+
+enum class OrdemExibicao {
+    MAIS_RECENTES,
+    MAIS_ANTIGOS
 }
 
 data class RegistroFormState(
@@ -36,13 +43,15 @@ data class RegistroFormState(
 
     val erroFoto: Boolean = false,
 
-    val erroLocalizacao: Boolean = false,
-
     val imageUri: String? = null,
 
     val latitude: Double? = null,
 
     val longitude: Double? = null,
+
+    val exibindoDialogCamera: Boolean = false,
+
+    val exibindoDialogLocalizacao: Boolean = false,
 
     )
 
@@ -62,6 +71,9 @@ sealed class RegistroEvent {
         RegistroEvent()
 
     object SolicitarLocalizacao :
+        RegistroEvent()
+
+    object AbrirPermissaoLocalizacaoSistema :
         RegistroEvent()
 }
 
@@ -88,6 +100,56 @@ class RegistroViewModel(
             StateFlow<RegistroFormState> =
         _formState.asStateFlow()
 
+    private var registrosCarregados: List<Registro> = emptyList()
+
+    private var ordemAtual: OrdemExibicao = OrdemExibicao.MAIS_RECENTES
+
+    fun getOrdemAtual(): OrdemExibicao = ordemAtual
+
+    fun alterarOrdemExibicao(ordem: OrdemExibicao) {
+        ordemAtual = ordem
+        if (_uiState.value is RegistroUiState.Success) {
+            _uiState.value = RegistroUiState.Success(
+                ordenarRegistros(registrosCarregados, ordemAtual)
+            )
+        }
+    }
+
+    private fun ordenarRegistros(
+        lista: List<Registro>,
+        ordem: OrdemExibicao
+    ): List<Registro> {
+        val formato = SimpleDateFormat(
+            "dd/MM/yyyy",
+            Locale.getDefault()
+        )
+
+        return when (ordem) {
+            OrdemExibicao.MAIS_RECENTES -> {
+                lista.sortedWith(
+                    compareByDescending<Registro> { registro ->
+                        try {
+                            formato.parse(registro.data)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }.thenByDescending { it.id }
+                )
+            }
+            OrdemExibicao.MAIS_ANTIGOS -> {
+                lista.sortedWith(
+                    compareBy<Registro> { registro ->
+                        try {
+                            formato.parse(registro.data)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }.thenBy { it.id }
+                )
+            }
+        }
+    }
+
     private fun criarRegistro(
         state: RegistroFormState
     ): Registro {
@@ -108,8 +170,7 @@ class RegistroViewModel(
         return erroData != null ||
                 erroCausa != null ||
                 erroObservacao != null ||
-                erroFoto ||
-                erroLocalizacao
+                erroFoto
     }
 
     private fun validarFormulario(
@@ -120,7 +181,6 @@ class RegistroViewModel(
         var erroCausa: String? = null
         var erroObservacao: String? = null
         var erroFoto = false
-        var erroLocalizacao = false
 
         if (state.data.isBlank()) {
             erroData = "Informe a data"
@@ -139,30 +199,58 @@ class RegistroViewModel(
             erroFoto = true
         }
 
-        if (
-            state.latitude == null ||
-            state.longitude == null
-        ) {
-            erroLocalizacao = true
-        }
-
         return state.copy(
             erroData = erroData,
             erroCausa = erroCausa,
             erroObservacao = erroObservacao,
-            erroFoto = erroFoto,
-            erroLocalizacao = erroLocalizacao
+            erroFoto = erroFoto
         )
     }
 
     fun onPermissaoCameraConcedida() {
+        _formState.value = _formState.value.copy(
+            exibindoDialogCamera = true
+        )
+    }
 
+    fun onConfirmarDialogCamera() {
+        _formState.value = _formState.value.copy(
+            exibindoDialogCamera = false
+        )
         viewModelScope.launch {
-
             _event.emit(
                 RegistroEvent.AbrirCamera
             )
         }
+    }
+
+    fun onCancelarDialogCamera() {
+        _formState.value = _formState.value.copy(
+            exibindoDialogCamera = false
+        )
+    }
+
+    fun solicitarPermissaoLocalizacao() {
+        _formState.value = _formState.value.copy(
+            exibindoDialogLocalizacao = true
+        )
+    }
+
+    fun onConfirmarDialogLocalizacao() {
+        _formState.value = _formState.value.copy(
+            exibindoDialogLocalizacao = false
+        )
+        viewModelScope.launch {
+            _event.emit(
+                RegistroEvent.AbrirPermissaoLocalizacaoSistema
+            )
+        }
+    }
+
+    fun onCancelarDialogLocalizacao() {
+        _formState.value = _formState.value.copy(
+            exibindoDialogLocalizacao = false
+        )
     }
 
     fun onFotoClicked() {
@@ -305,24 +393,8 @@ class RegistroViewModel(
                     "Lista carregada: ${lista.size}"
                 )
 
-                val formato =
-                    java.text.SimpleDateFormat(
-                        "dd/MM/yyyy",
-                        java.util.Locale.getDefault()
-                    )
-
-                val listaOrdenada =
-                    lista.sortedByDescending { registro ->
-
-                        try {
-
-                            formato.parse(registro.data)
-
-                        } catch (e: Exception) {
-
-                            null
-                        }
-                    }
+                registrosCarregados = lista
+                val listaOrdenada = ordenarRegistros(registrosCarregados, ordemAtual)
 
                 _uiState.value =
                     RegistroUiState.Success(listaOrdenada)

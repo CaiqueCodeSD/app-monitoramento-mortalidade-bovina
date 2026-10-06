@@ -45,6 +45,9 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient:
             FusedLocationProviderClient
 
+    private var dialogCamera: AlertDialog? = null
+    private var dialogLocalizacao: AlertDialog? = null
+
     private fun finalizarRegistro(
         registro: Registro
     ) {
@@ -57,7 +60,7 @@ class RegistroActivity : AppCompatActivity() {
         )
 
         setResult(
-            Activity.RESULT_OK,
+            RESULT_OK,
             resultIntent
         )
 
@@ -132,6 +135,14 @@ class RegistroActivity : AppCompatActivity() {
         })
     }
 
+    override fun onDestroy() {
+        dialogCamera?.dismiss()
+        dialogCamera = null
+        dialogLocalizacao?.dismiss()
+        dialogLocalizacao = null
+        super.onDestroy()
+    }
+
     private fun mostrarDialogConfirmacao() {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.confirmar_saida_registro_titulo))
@@ -158,12 +169,6 @@ class RegistroActivity : AppCompatActivity() {
 
         binding.tvErroFoto.visibility =
             if (state.erroFoto)
-                View.VISIBLE
-            else
-                View.GONE
-
-        binding.tvErroLocalizacao.visibility =
-            if (state.erroLocalizacao)
                 View.VISIBLE
             else
                 View.GONE
@@ -213,6 +218,24 @@ class RegistroActivity : AppCompatActivity() {
 
             binding.tvLongitude.text =
                 "Longitude: ${state.longitude}"
+        }
+
+        if (state.exibindoDialogCamera) {
+            if (dialogCamera == null || dialogCamera?.isShowing == false) {
+                exibirDialogOrientacaoCamera()
+            }
+        } else {
+            dialogCamera?.dismiss()
+            dialogCamera = null
+        }
+
+        if (state.exibindoDialogLocalizacao) {
+            if (dialogLocalizacao == null || dialogLocalizacao?.isShowing == false) {
+                exibirDialogPermissaoLocalizacao()
+            }
+        } else {
+            dialogLocalizacao?.dismiss()
+            dialogLocalizacao = null
         }
     }
 
@@ -283,15 +306,52 @@ class RegistroActivity : AppCompatActivity() {
                             if (verificarPermissaoLocalizacao()) {
                                 capturarLocalizacao()
                             } else {
-                                locationPermissionLauncher.launch(
-                                    Manifest.permission.ACCESS_FINE_LOCATION
-                                )
+                                viewModel.solicitarPermissaoLocalizacao()
                             }
+                        }
+
+                        RegistroEvent.AbrirPermissaoLocalizacaoSistema -> {
+                            locationPermissionLauncher.launch(
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            )
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun exibirDialogPermissaoLocalizacao() {
+        dialogLocalizacao = AlertDialog.Builder(this)
+            .setTitle(getString(R.string.permissao_localizacao_titulo))
+            .setMessage(getString(R.string.permissao_localizacao_msg))
+            .setPositiveButton(getString(R.string.permitir)) { _, _ ->
+                viewModel.onConfirmarDialogLocalizacao()
+            }
+            .setNegativeButton(getString(R.string.agora_nao)) { _, _ ->
+                viewModel.onCancelarDialogLocalizacao()
+            }
+            .setOnCancelListener {
+                viewModel.onCancelarDialogLocalizacao()
+            }
+            .show()
+    }
+
+    private fun exibirDialogOrientacaoCamera() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_orientacao_camera, null)
+
+        dialogCamera = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setPositiveButton(getString(R.string.entender_abrir_camera)) { _, _ ->
+                viewModel.onConfirmarDialogCamera()
+            }
+            .setNegativeButton(getString(R.string.agora_nao)) { _, _ ->
+                viewModel.onCancelarDialogCamera()
+            }
+            .setOnCancelListener {
+                viewModel.onCancelarDialogCamera()
+            }
+            .show()
     }
 
     private fun abrirSeletorData() {
