@@ -18,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.myfirstapp.R
 import kotlinx.coroutines.launch
+import android.widget.Toast
+import android.util.Log
 
 class CameraActivity : AppCompatActivity() {
 
@@ -26,6 +28,8 @@ class CameraActivity : AppCompatActivity() {
     private val repository = CameraRepository()
 
     private var cameraFrontal = false
+
+    private var capturaEmAndamento = false
 
     private lateinit var scaleGestureDetector: ScaleGestureDetector
 
@@ -41,28 +45,55 @@ class CameraActivity : AppCompatActivity() {
         )
     }
 
+
     private fun capturarFoto() {
+
+        // Evita iniciar outra captura enquanto a atual está processando.
+        if (capturaEmAndamento) return
+
+        capturaEmAndamento = true
+        binding.btnCapturar.isEnabled = false
 
         repository.capturarFoto(this) { caminho ->
 
-            val intent = Intent()
+            if (caminho.isNullOrBlank()) {
 
-            intent.putExtra(
-                "foto",
-                caminho
-            )
+                // A captura falhou: permite tentar novamente.
+                capturaEmAndamento = false
+                binding.btnCapturar.isEnabled = true
 
-            setResult(
-                RESULT_OK,
-                intent
-            )
+                Toast.makeText(
+                    this,
+                    "Não foi possível capturar a foto. Tente novamente.",
+                    Toast.LENGTH_LONG
+                ).show()
 
-            finish()
+            } else {
+
+                val intent = Intent().apply {
+                    putExtra("foto", caminho)
+                }
+
+                Log.d("CameraDebug", "Foto capturada; finalizando câmera")
+
+                setResult(
+                    RESULT_OK,
+                    intent
+                )
+
+                finish()
+            }
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d(
+            "CameraDebug",
+            "CameraActivity onCreate: ${System.identityHashCode(this)}"
+        )
 
         enableEdgeToEdge()
 
@@ -86,6 +117,17 @@ class CameraActivity : AppCompatActivity() {
 
         configurarZoom()
         configurarClicks()
+    }
+
+    override fun onDestroy() {
+        Log.d(
+            "CameraDebug",
+            "CameraActivity onDestroy: " +
+                    "finishing=$isFinishing, " +
+                    "changingConfig=$isChangingConfigurations, " +
+                    "instance=${System.identityHashCode(this)}"
+        )
+        super.onDestroy()
     }
 
     private fun configurarZoom() {
@@ -135,9 +177,8 @@ class CameraActivity : AppCompatActivity() {
     private fun configurarClicks() {
 
         binding.btnCapturar.setOnClickListener {
-
+            Log.d("CameraDebug", "Botão de captura pressionado")
             capturarFoto()
-
         }
 
         binding.btnTrocarCamera.setOnClickListener {

@@ -174,37 +174,57 @@
 
 
 
-            <!-- CAUSA -->
 
+            <!-- SUSPEITA DA MORTE -->
+
+            <TextView
+                android:id="@+id/tvTituloSuspeita"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="Suspeita da morte"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/containerCategoriasMortalidade"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tvErroCausa"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/primaryColor"
+                android:textSize="12sp"
+                android:visibility="gone" />
 
             <com.google.android.material.textfield.TextInputLayout
-
-                android:id="@+id/tilCausa"
-
+                android:id="@+id/tilCausaPersonalizada"
                 android:layout_width="match_parent"
-
                 android:layout_height="wrap_content"
-
-                android:layout_marginTop="12dp"
-
-                android:hint="Suspeita da morte"
-
+                android:layout_marginTop="8dp"
+                android:hint="Descreva a suspeita"
+                android:visibility="gone"
                 app:boxCornerRadiusTopStart="16dp"
                 app:boxCornerRadiusTopEnd="16dp"
                 app:boxCornerRadiusBottomStart="16dp"
                 app:boxCornerRadiusBottomEnd="16dp">
 
-
                 <com.google.android.material.textfield.TextInputEditText
-
-                    android:id="@+id/etCausa"
-
+                    android:id="@+id/etCausaPersonalizada"
                     android:layout_width="match_parent"
-
-                    android:layout_height="wrap_content"/>
-
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:minLines="2" />
 
             </com.google.android.material.textfield.TextInputLayout>
+
 
 
 
