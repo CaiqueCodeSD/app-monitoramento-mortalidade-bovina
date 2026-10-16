@@ -1,5 +1,6 @@
 package com.example.myfirstapp.ui
 
+import android.util.Log
 import android.Manifest
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -35,10 +36,26 @@ import com.example.myfirstapp.model.Registro
 import com.example.myfirstapp.viewmodel.RegistroEvent
 import com.example.myfirstapp.viewmodel.RegistroFormState
 import com.example.myfirstapp.camera.CameraActivity
+import android.graphics.Typeface
+import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
+import com.example.myfirstapp.model.CategoriaMortalidade
+import com.example.myfirstapp.model.SuspeitaMorte
 
 class RegistroActivity : AppCompatActivity() {
 
     private val viewModel: RegistroViewModel by viewModel()
+
+    private val cabecalhosCategoria =
+        mutableMapOf<CategoriaMortalidade, TextView>()
+
+    private val gruposSuspeitas =
+        mutableMapOf<CategoriaMortalidade, RadioGroup>()
+
+    private val radiosSuspeitas =
+        mutableMapOf<SuspeitaMorte, RadioButton>()
 
     private lateinit var binding: ActivityRegistroBinding
 
@@ -83,12 +100,13 @@ class RegistroActivity : AppCompatActivity() {
             )
         }
 
-        binding.etCausa.doAfterTextChanged {
 
-            viewModel.onCausaChanged(
+        binding.etCausaPersonalizada.doAfterTextChanged {
+            viewModel.onCausaPersonalizadaChanged(
                 it?.toString().orEmpty()
             )
         }
+
 
         binding.etObservacao.doAfterTextChanged {
 
@@ -110,15 +128,32 @@ class RegistroActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val systemBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+            )
+
+            val teclado = insets.getInsets(
+                WindowInsetsCompat.Type.ime()
+            )
+
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                maxOf(systemBars.bottom, teclado.bottom)
+            )
+
             insets
         }
+
 
         fusedLocationClient =
             LocationServices
                 .getFusedLocationProviderClient(this)
+
+        configurarSeletorCausas()
 
         configurarClicks()
 
@@ -161,9 +196,6 @@ class RegistroActivity : AppCompatActivity() {
         binding.tilData.error =
             state.erroData
 
-        binding.tilCausa.error =
-            state.erroCausa
-
         binding.tilObservacao.error =
             state.erroObservacao
 
@@ -190,13 +222,37 @@ class RegistroActivity : AppCompatActivity() {
             binding.etData.setText(state.data)
         }
 
-        if (
-            binding.etCausa.text.toString()
-            != state.causa
-        ) {
 
-            binding.etCausa.setText(state.causa)
+        val usandoOutro =
+            state.suspeitaSelecionada == SuspeitaMorte.OUTRO
+
+        binding.tvErroCausa.text =
+            state.erroCausa.orEmpty()
+
+        binding.tvErroCausa.visibility =
+            if (state.erroCausa != null && !usandoOutro) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+
+        binding.tilCausaPersonalizada.visibility =
+            if (usandoOutro) View.VISIBLE else View.GONE
+
+        binding.tilCausaPersonalizada.error =
+            if (usandoOutro) state.erroCausa else null
+
+        if (
+            binding.etCausaPersonalizada.text.toString()
+            != state.causaPersonalizada
+        ) {
+            binding.etCausaPersonalizada.setText(
+                state.causaPersonalizada
+            )
         }
+
+        renderizarSeletorCausas(state)
+
 
         if (
             binding.etObservacao.text.toString()
@@ -279,7 +335,7 @@ class RegistroActivity : AppCompatActivity() {
                                 this@RegistroActivity,
                                 CameraActivity::class.java
                             )
-
+                            Log.d("CameraDebug", "RegistroActivity recebeu AbrirCamera")
                             cameraLauncher.launch(intent)
                         }
 
@@ -504,5 +560,138 @@ class RegistroActivity : AppCompatActivity() {
                 }
             }
     }
+
+
+    private fun dp(valor: Int): Int {
+        return (
+                valor * resources.displayMetrics.density
+                ).toInt()
+    }
+
+    private fun configurarSeletorCausas() {
+        binding.containerCategoriasMortalidade.removeAllViews()
+
+        cabecalhosCategoria.clear()
+        gruposSuspeitas.clear()
+        radiosSuspeitas.clear()
+
+        CategoriaMortalidade.values().forEach { categoria ->
+
+            val cabecalho = TextView(this).apply {
+                text = "▸ ${categoria.descricao}"
+                textSize = 16f
+                setTypeface(null, Typeface.BOLD)
+                setPadding(dp(16), dp(14), dp(16), dp(14))
+                setBackgroundResource(R.drawable.bg_localizacao)
+
+                isClickable = true
+                isFocusable = true
+
+                contentDescription =
+                    "Expandir categoria ${categoria.descricao}"
+
+                setOnClickListener {
+                    viewModel.onCategoriaMortalidadeSelecionada(
+                        categoria
+                    )
+                }
+            }
+
+            val grupo = RadioGroup(this).apply {
+                orientation = RadioGroup.VERTICAL
+                visibility = View.GONE
+
+                setPadding(
+                    dp(8),
+                    dp(4),
+                    dp(8),
+                    dp(4)
+                )
+            }
+
+            SuspeitaMorte.values()
+                .filter { it.categoria == categoria }
+                .forEach { suspeita ->
+
+                    val radio = RadioButton(this).apply {
+                        id = View.generateViewId()
+                        text = suspeita.descricao
+                        textSize = 14f
+
+                        setPadding(
+                            dp(4),
+                            dp(8),
+                            dp(4),
+                            dp(8)
+                        )
+
+                        setOnClickListener {
+                            viewModel.onSuspeitaMorteSelecionada(
+                                suspeita
+                            )
+                        }
+                    }
+
+                    grupo.addView(
+                        radio,
+                        RadioGroup.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                    )
+
+                    radiosSuspeitas[suspeita] = radio
+                }
+
+            binding.containerCategoriasMortalidade.addView(
+                cabecalho,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = dp(4)
+                }
+            )
+
+            binding.containerCategoriasMortalidade.addView(
+                grupo,
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = dp(8)
+                }
+            )
+
+            cabecalhosCategoria[categoria] = cabecalho
+            gruposSuspeitas[categoria] = grupo
+        }
+    }
+
+    private fun renderizarSeletorCausas(
+        state: RegistroFormState
+    ) {
+        cabecalhosCategoria.forEach { (categoria, cabecalho) ->
+
+            val expandida =
+                state.categoriaSelecionada == categoria
+
+            cabecalho.text =
+                "${if (expandida) "▾" else "▸"} ${categoria.descricao}"
+
+            cabecalho.contentDescription =
+                "${if (expandida) "Recolher" else "Expandir"} " +
+                        "categoria ${categoria.descricao}"
+
+            gruposSuspeitas[categoria]?.visibility =
+                if (expandida) View.VISIBLE else View.GONE
+        }
+
+        radiosSuspeitas.forEach { (suspeita, radio) ->
+            radio.isChecked =
+                state.suspeitaSelecionada == suspeita
+        }
+    }
+
 
 }

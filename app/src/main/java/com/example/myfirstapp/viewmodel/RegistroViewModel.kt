@@ -15,6 +15,8 @@ import java.net.UnknownHostException
 import kotlinx.coroutines.flow.asSharedFlow
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.example.myfirstapp.model.CategoriaMortalidade
+import com.example.myfirstapp.model.SuspeitaMorte
 
 sealed class RegistroUiState {
     object Loading : RegistroUiState()
@@ -32,6 +34,12 @@ data class RegistroFormState(
     val data: String = "",
 
     val causa: String = "",
+
+    val categoriaSelecionada: CategoriaMortalidade? = null,
+
+    val suspeitaSelecionada: SuspeitaMorte? = null,
+
+    val causaPersonalizada: String = "",
 
     val observacao: String = "",
 
@@ -214,10 +222,12 @@ class RegistroViewModel(
     }
 
     fun onConfirmarDialogCamera() {
+        Log.d("CameraDebug", "onConfirmarDialogCamera chamado")
         _formState.value = _formState.value.copy(
             exibindoDialogCamera = false
         )
         viewModelScope.launch {
+            Log.d("CameraDebug", "Emitindo AbrirCamera")
             _event.emit(
                 RegistroEvent.AbrirCamera
             )
@@ -306,6 +316,70 @@ class RegistroViewModel(
             _formState.value.copy(
                 causa = causa
             )
+    }
+
+
+    fun onCategoriaMortalidadeSelecionada(
+        categoria: CategoriaMortalidade
+    ) {
+        val state = _formState.value
+
+        if (state.categoriaSelecionada == categoria) {
+            // Recolhe a categoria sem perder a seleção atual.
+            _formState.value = state.copy(
+                categoriaSelecionada = null
+            )
+        } else {
+            // Abre a nova categoria e limpa a suspeita anterior.
+            _formState.value = state.copy(
+                categoriaSelecionada = categoria,
+                suspeitaSelecionada = null,
+                causa = "",
+                causaPersonalizada = "",
+                erroCausa = null
+            )
+        }
+    }
+
+
+    fun onSuspeitaMorteSelecionada(
+        suspeita: SuspeitaMorte
+    ) {
+        val causa = when (suspeita) {
+            SuspeitaMorte.OUTRO -> ""
+            else -> suspeita.descricao
+        }
+
+        _formState.value = _formState.value.copy(
+            suspeitaSelecionada = suspeita,
+            causa = causa,
+            causaPersonalizada = "",
+            erroCausa = null
+        )
+    }
+
+    fun onCausaPersonalizadaChanged(
+        causaPersonalizada: String
+    ) {
+        val state = _formState.value
+
+        val causa = if (
+            state.suspeitaSelecionada == SuspeitaMorte.OUTRO
+        ) {
+            if (causaPersonalizada.isBlank()) {
+                ""
+            } else {
+                "Outro: ${causaPersonalizada.trim()}"
+            }
+        } else {
+            state.causa
+        }
+
+        _formState.value = state.copy(
+            causaPersonalizada = causaPersonalizada,
+            causa = causa,
+            erroCausa = null
+        )
     }
 
     fun onDataChanged(data: String) {

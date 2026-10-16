@@ -45,68 +45,48 @@ class CameraRepository {
 
     fun getZoomState() = camera?.cameraInfo?.zoomState
 
+
     fun capturarFoto(
         context: Context,
-        callback: (String) -> Unit
+        callback: (String?) -> Unit
     ) {
+        val capture = imageCapture
 
+        // A câmera pode ainda não estar pronta.
+        if (capture == null) {
+            callback(null)
+            return
+        }
 
         val arquivo = File(
-
             context.filesDir,
-
             "registro_${System.currentTimeMillis()}.jpg"
-
         )
 
-
         val outputOptions =
-
-            ImageCapture.OutputFileOptions
-                .Builder(arquivo)
+            ImageCapture.OutputFileOptions.Builder(arquivo)
                 .build()
 
+        capture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(context),
+            object : ImageCapture.OnImageSavedCallback {
 
-
-        imageCapture?.let { capture ->
-
-
-            capture.takePicture(
-
-                outputOptions,
-
-                ContextCompat.getMainExecutor(context),
-
-
-                object :
-                    ImageCapture.OnImageSavedCallback {
-
-
-                    override fun onImageSaved(
-                        output:
-                        ImageCapture.OutputFileResults
-                    ) {
-
-                        callback(
-                            arquivo.absolutePath
-                        )
-
-                    }
-
-
-                    override fun onError(
-                        exception:
-                        ImageCaptureException
-                    ) {
-
-                    }
-
+                override fun onImageSaved(
+                    output: ImageCapture.OutputFileResults
+                ) {
+                    callback(arquivo.absolutePath)
                 }
 
-            )
-
-        }
+                override fun onError(
+                    exception: ImageCaptureException
+                ) {
+                    callback(null)
+                }
+            }
+        )
     }
+
 
     fun iniciarCamera(
         context: Context,
