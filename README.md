@@ -32,7 +32,7 @@ A aplicação utiliza uma API simulada com Mockoon para testes de integração.
 Dependendo do ambiente:
 
 ### Emulador Android:
-http://10.0.2.2:3000/
+http://x.x.x.x:3000/
 ### Dispositivo físico:
 http://SEU_IP_LOCAL:3000/
 
